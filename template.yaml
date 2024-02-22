@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack that creates an AWS budget, notifications
+#need to improve: sent notification to multiple email 
+Parameters:
+  BudgetAmount:
+    Type: Number
+    Default: 4.10
+    Description: Maximum permissible spend for the month
+  Email:
+    Type: String
+    Default: cynthia.zhang@ascendingdc.com
+    Description: Email address to deliver notifications to
+
+Resources:
+  WarningTopic:
+    Type: AWS::SNS::Topic
+
+  WarningTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sns:Publish
+            Resource: "*"
+            Principal:
+              Service: budgets.amazonaws.com
+      Topics:
+        - !Ref WarningTopic
+
+  Budget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetLimit:
+          Amount: !Ref BudgetAmount
+          Unit: USD
+        TimeUnit: MONTHLY #DAILY
+        BudgetType: COST
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref BudgetAmount
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref Email
+            - SubscriptionType: SNS
+              Address: !Ref WarningTopic
+
+  AlarmSubscriberEmail:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref Email
+      Protocol: email
+      TopicArn: !Ref WarningTopic
+
+
+Outputs:
+  BudgetId:
+    Value: !Ref Budget
