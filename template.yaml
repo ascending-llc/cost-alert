@@ -4,11 +4,11 @@ Description: Stack that creates an AWS budget, notifications
 Parameters:
   BudgetAmount:
     Type: Number
-    Default: 4.10
-    Description: Maximum permissible spend for the month
+    Default: 10 #daily $ threshold, e.g. 100 or 50
+    Description: Maximum permissible spend for per day
   Email:
     Type: String
-    Default: cynthia.zhang@ascendingdc.com
+    Default: cynthia.zhang@ascendingdc.com #alert recipient array, email@ascendingdc.com.email2@ascendingdc.com
     Description: Email address to deliver notifications to
 
 Resources:
@@ -36,11 +36,11 @@ Resources:
         BudgetLimit:
           Amount: !Ref BudgetAmount
           Unit: USD
-        TimeUnit: MONTHLY #DAILY
+        TimeUnit: DAILY #MONTHLY
         BudgetType: COST
       NotificationsWithSubscribers:
         - Notification:
-            NotificationType: FORECASTED
+            NotificationType: ACTUAL
             ComparisonOperator: GREATER_THAN
             Threshold: !Ref BudgetAmount
           Subscribers:
