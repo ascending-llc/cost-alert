@@ -6,10 +6,19 @@ Parameters:
     Type: Number
     Default: 10 #daily $ threshold, e.g. 100 or 50
     Description: Maximum permissible spend for per day
-  Email:
-    Type: String
-    Default: cynthia.zhang@ascendingdc.com #alert recipient array, email@ascendingdc.com.email2@ascendingdc.com
-    Description: Email address to deliver notifications to
+  # Email:
+  #   Type: CommaDelimitedList 
+  #   Default: "cynthia.zhang@ascendingdc.com, xintian0122@gmail.com"  #alert recipient array, email@ascendingdc.com.email2@ascendingdc.com
+  #   Description: Email address to deliver notifications to
+
+  Email1:
+    Type: String 
+    Default: cynthia.zhang@ascendingdc.com  #alert recipient array, email@ascendingdc.com.email2@ascendingdc.com
+    Description: Primary Email address to deliver notifications to
+  Email2:
+    Type: String 
+    Default: xintian0122@gmail.com  #alert recipient array, email@ascendingdc.com.email2@ascendingdc.com
+    Description: Secondaryemail address to deliver notifications to
 
 Resources:
   WarningTopic:
@@ -44,18 +53,24 @@ Resources:
             ComparisonOperator: GREATER_THAN
             Threshold: !Ref BudgetAmount
           Subscribers:
-            - SubscriptionType: EMAIL
-              Address: !Ref Email
+            # - SubscriptionType: EMAIL
+            #   Address: !Ref Email
             - SubscriptionType: SNS
               Address: !Ref WarningTopic
 
-  AlarmSubscriberEmail:
+  AlarmSubscriberEmail1:
     Type: AWS::SNS::Subscription
     Properties:
-      Endpoint: !Ref Email
+      Endpoint: !Ref Email1
       Protocol: email
       TopicArn: !Ref WarningTopic
 
+  AlarmSubscriberEmail2:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref Email2
+      Protocol: email
+      TopicArn: !Ref WarningTopic
 
 Outputs:
   BudgetId:
